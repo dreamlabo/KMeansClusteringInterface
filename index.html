@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/c43c1a8058.js" crossorigin="anonymous"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="./styles/header/header.css">
+    <link rel="stylesheet" href="./styles/main.css">
+    <script src="./scripts/scripts.js" defer>  </script>
+
+    <style>
+        /* Tooltip styles */
+        .tooltip {
+            position: absolute;
+            text-align: left;
+            padding: 5px;
+            font: 12px sans-serif;
+            background: lightsteelblue;
+            border: 1px solid #333;
+            border-radius: 5px;
+            pointer-events: none;
+            opacity: 0;
+        }
+        .grid line {
+            stroke: black;
+            stroke-opacity: 0.2;
+            shape-rendering: crispEdges;
+        }
+        .legend {
+            font-size: 12px;
+            font-family: sans-serif;
+        }
+        .legend rect {
+            stroke-width: 2;
+            stroke: black;
+        }
+    </style>
+    <title>K-Means Clustering</title>
+</head>
+<body>
+    <header class="header-wrapper">
+        <div class="header-container">
+            <a href="./index.html" class="header-logo">
+                <div class="header-logo-inner-container">
+                    <div>LABO</div>
+                    <div>CREATIVE REALMS</div>
+                </div>
+            </a>
+            <nav>
+                <ul class="nav-links">
+                    <!-- <li href="./index.html"><a href="">HOME</a></li> -->
+                    <!-- <li ><a href="">WORKS</a></li>
+                    <li href=""><a href="">ABOUT</a></li> -->
+                    <!-- <li href=""><a href="">CONTACT</a></li> -->
+                </ul>
+            </nav>
+        </div> 
+    </header>
+    <main class="page-wrapper">
+        <section>
+            <div class="main-grid-wrapper">
+                <!-- <aside class="aside-wrapper">
+                    <form>
+                        <div class="aside-section-container" >
+                            <h2 class="aside-header">Enter Points</h2>
+                            <div class="aside-form-component-wrapper">
+                                <div class="aside-form-inner-component">
+                                    <input type="radio" id="mouse-clicks" name="enter-type" value="mouse-clicks">
+                                    <label for="mouse-clicks">via Mouse Clicks</label>
+                                </div>
+                                <div class="aside-form-inner-component">
+                                    <input  type="radio" id="upload-csv" name="enter-type" value="upload-csv">
+                                    <label for="upload-csv">Upload CSV</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h2 class="aside-header">Graphs</h2>
+                            <div class="aside-form-component-wrapper">
+                                <div class="aside-form-inner-component">
+                                    <input type="checkbox">
+                                    <label for="">via Mouse Clicks</label>
+                                </div>
+                                <div class="aside-form-inner-component">
+                                    <input type="checkbox">
+                                    <label for="">Upload CSV</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h2 class="aside-header">Tables</h2>
+                            <div class="aside-form-component-wrapper">
+                                <div class="aside-form-inner-component">
+                                    <input type="checkbox">
+                                    <label for="">via Mouse Clicks</label>
+                                </div>
+                                <div class="aside-form-inner-component">
+                                    <input type="checkbox">
+                                    <label for="">Upload CSV</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <input type="checkbox">
+                            <label for="">Show All</label>
+                        </div>
+                    </form>
+                </aside> -->
+                <div class="right-page-column">
+                    <div>
+                        <h1 class="page-title">K-Means Clustering</h1>
+                        <h2 class="click-area-title">Click in the area below to enter a point</h3>
+                        <div id="click-area" class="click-area"></div>
+                            <form  class="click-area-form" action="">
+                                <div class="centroids-input">
+                                    <label for="num-centroids">Enter the number of centroids: </label>
+                                    <input type="number" min="1"  id="num-centroids" name="num-centroids">
+                                    <span id="centroid-error-message" class="error-message">Invalid Input</span>
+                                </div>
+                               
+                                <div>
+                                    <button onClick="calculate(event)" class="btn-click-area-form">Calculate</button>
+                                    <button onClick="clearArea(event)"class="btn-click-area-form">Clear Area</button>
+                                </div>
+                            </form>
+                            <div id="iterations" class="iterations-container">
+                                <span id="iterations-label" class="iterations-label">Iteration: </span>
+                                <span  id ="iterations-amount" class="iterations-amount">&nbsp;</span>
+                                <p id ="iterations-concluded" class="iterations-concluded">&nbsp;</p>
+                            </div>
+                      
+                            <div id="table-cluster-movement" class="table-container"></div>
+                         
+                            <div class="graph-container">
+                            
+                                <div id="scatter-graph" class="chart-container"></div>
+                                <div id="chart" class="chart-container"></div>
+                            </div>
+                                <script>
+                                      const scatterHeight = 350;
+                                      const scatterWidth = 550;
+                                      const scatterMargin = { top: 30, right: 30, bottom: 50, left: 60};
+                              
+                                    // createPointScatterGraph()
+                                    const scatterSVG = d3.select("#scatter-graph")
+                                    .append("svg")
+                                    .attr("width", scatterWidth + scatterMargin.left + scatterMargin.right)
+                                    .attr("height", scatterHeight + scatterMargin.top + scatterMargin.bottom)
+                                    .append("g")
+                                    .attr("transform", `translate(${scatterMargin.left},${scatterMargin.top})`);
+
+                                 
+                                    // { top: 30, right: 30, bottom: 50, left: 60 };
+                                    // const scatterWidth = +scatterSVG.attr("width") - scatterMargin.left - scatterMargin.right;
+                                    // const scatterHeight = +scatterSVG.attr("height") - scatterMargin.top - scatterMargin.bottom;
+
+                                    // Add the graph title
+                                    scatterSVG.append("text")
+                                        .attr("x", scatterWidth / 2) // Centered horizontally
+                                        .attr("y", -scatterMargin.top / 2) // Adjust the vertical position above the graph
+                                        .attr("text-anchor", "middle") // Center the text
+                                        .style("font-size", "16px") // Set the font size
+                                        .style("font-weight", "bold") // Make the font bold
+                                        .text("Scatterplot of Points");
+
+                                    // Initial setup of scales and axes
+                                    const xScaleScatter = d3.scaleLinear()
+                                    .domain([1, 10]) // Example domain
+                                    .range([0, scatterWidth]);
+                            
+                                const yScaleScatter = d3.scaleLinear()
+                                    .domain([0, 100]) // Example domain
+                                    .range([scatterHeight, 0]);
+
+                                const xAxisScatter = d3.axisBottom(xScaleScatter);
+                                const yAxisScatter = d3.axisLeft(yScaleScatter);
+
+                                           // Append the x-axis to the SVG container
+                                scatterSVG.append("g")
+                                    .attr("class", "x-axis-scatter")
+                                    .attr("transform", `translate(0,${scatterHeight})`)
+                                    .call(xAxisScatter);
+                            
+                                // Append x-axis label
+                                scatterSVG.append("text")
+                                    .attr("class", "x-axis-label-scatter")
+                                    .attr("text-anchor", "middle")
+                                    .attr("x", scatterWidth/2)
+                                    .attr("y", scatterHeight + scatterMargin.bottom - 5)
+                                    .text("x-axis");
+                            
+                                // Append the y-axis to the SVG container
+                                scatterSVG.append("g")
+                                    .attr("class", "y-axis-scatter")
+                                    .call(yAxisScatter);
+
+                                    // Add y-axis label
+                                scatterSVG.append("text")
+                                    .attr("transform", "rotate(-90)")
+                                    .attr("y", 0 - scatterMargin.left - 0)
+                                    .attr("x", 0 - (scatterHeight / 2))
+                                    .attr("dy", "1em")
+                                    .style("text-anchor", "middle")
+                                    .text("y-axis");
+
+                                    
+                        function updateGraph(pointData, centroidData, colorMapData) {
+                            console.log(pointData)
+                            const xDomain = d3.extent(pointData, d => d.x);  // Find the min and max of the new x values
+                            const yDomain = d3.extent(pointData, d => d.y);  // Find the min and max of the new y values
+
+                            // Update the domains of the scales
+                            // xScaleScatter.domain(xDomain);
+                            // yScaleScatter.domain(yDomain);
+
+                            const roundUpToNearestHundred = (num) => Math.ceil(num / 100) * 100;
+
+                                // Add some padding to the domains
+                                // const xMax = getNextTickValue(xDomain[1], 50); // Adjust tick size as needed
+                                // const yMax = getNextTickValue(yDomain[1], 10); // Adjust tick size as needed
+
+                                const xMax = roundUpToNearestHundred(d3.max(pointData, d => d.x)); // Round up the max x value
+                            const yMax = roundUpToNearestHundred(d3.max(pointData, d => d.y)); // Round up the max y value
+
+                            // Update the scales with the new domains
+                            xScaleScatter.domain([0, xMax]);
+                            yScaleScatter.domain([0, yMax]);
+
+                                // Redraw the x-axis
+                                scatterSVG.select(".x-axis-scatter")
+                                .transition()
+                                .duration(750)  // Smooth transition for better UX
+                                .call(d3.axisBottom(xScaleScatter));
+
+                            // Redraw the y-axis
+                            scatterSVG.select(".y-axis-scatter")
+                                .transition()
+                                .duration(750)
+                                .call(d3.axisLeft(yScaleScatter));
+
+                                
+                        updatePlotData(pointData, centroidData, colorMapData)
+
+                                
+                        }
+
+                        function roundUpToNiceValue(value, factor = 1) {
+                            const exponent = Math.floor(Math.log10(value));
+                            const base = Math.pow(10, exponent);
+                            return Math.ceil(value / base) * base * factor;
+                        }
+
+                        function getNextTickValue(value, tickSize = 10) {
+                            return Math.ceil(value / tickSize) * tickSize;
+                        }
+
+function updatePlotData(pointData, centroidData, colorMapData) {
+    addGridlines()
+
+    // Remove all existing points 
+    scatterSVG.selectAll(".point").remove();
+
+    // Remove old centroids
+    scatterSVG.selectAll(".centroid-group").remove();
+
+    // Bind new point data
+    const points = scatterSVG.selectAll(".point")
+        .data(pointData);
+
+        // Enter phase: Add new points
+        points.enter()
+            .append("circle")
+            .attr("class", "point")
+            .attr("cx", d => xScaleScatter(d.x))
+            .attr("cy", scatterHeight) // Start from the bottom of the y-axis
+            .attr("r", 4)
+            .attr("fill", d => colors[d.cluster]) // Color based on cluster
+            .transition()
+            .duration(1500)
+            .attr("cy", d => yScaleScatter(d.y)) // Animate to actual y position
+            .on("end", function() {
+                // Draw and animate centroids after points animation ends
+                const centroidGroups = scatterSVG.selectAll(".centroid-group")
+                    .data(centroidData)
+                    .enter()
+                    .append("g")
+                    .attr("class", "centroid-group");
+
+                centroidGroups.append("circle")
+                    .attr("class", "cent")
+                    .attr("cx", d => xScaleScatter(d.x))
+                    .attr("cy", scatterHeight) // Start from the bottom of the y-axis
+                    .attr("r", 8) // Radius of centroid
+                    .attr("fill", "none") // No fill color
+                    .attr("stroke", "black") // Black outline
+                    .attr("stroke-width", 1) // Stroke width
+                    .transition()
+                    .duration(1000)
+                    .attr("cy", d => yScaleScatter(d.y)); // Animate to actual y position
+
+                centroidGroups.append("text")
+                    .attr("class", "centroid-label")
+                    .attr("x", d => xScaleScatter(d.x))
+                    .attr("y", scatterHeight) // Start from the bottom of the y-axis
+                    .attr("dy", ".4em") // Center text vertically within circle
+                    .attr("text-anchor", "middle")
+                    .text(d => d.cluster)
+                    .style("font-size", "10px")
+                    .style("fill", "black")
+                    .transition()
+                    .duration(1000)
+                    .attr("y", d => yScaleScatter(d.y)); // Animate text to actual y position
+            });
+}
+
+function addGridlines() {
+        // Remove old gridlines
+        scatterSVG.selectAll(".grid").remove();
+    scatterSVG.selectAll(".grid").remove();
+    // Add horizontal gridlines
+    scatterSVG.append("g")
+        .attr("class", "grid")
+        .attr("transform", `translate(0,${scatterHeight})`)
+        .call(d3.axisBottom(xScaleScatter)
+            .tickSize(-scatterHeight)         // Extend the ticks to the left for gridlines
+            .tickFormat("")            // Remove labels
+        )
+        .selectAll("line")             // Select all gridlines
+        .attr("stroke", "lightgray")   // Set the gridline color
+        .attr("stroke-opacity", 0.5);  // Set the gridline opacity
+
+    // Add vertical gridlines
+    scatterSVG.append("g")
+        .attr("class", "grid")
+        .call(d3.axisLeft(yScaleScatter)
+            .tickSize(-scatterWidth)          // Extend the ticks to the right for gridlines
+            .tickFormat("")            // Remove labels
+        )
+        .selectAll("line")             // Select all gridlines
+        .attr("stroke", "lightgray")   // Set the gridline color
+        .attr("stroke-opacity", 0.5);  // Set the gridline opacity
+}
+                    
+                                </script>
+                                
+                            <!-- <script>
+                                const pointsOne = [
+                              { x: 779, y: 939, distance: 63.8200595424354, cluster: 1 },
+                              { x: 853, y: 835, distance: 63.8200595424354, cluster: 1 },
+                              { x: 720, y: 726, distance: 98.39828363453405, cluster: 3 },
+                              { x: 506, y: 712, distance: 128.56991180763185, cluster: 3 },
+                              { x: 327, y: 785, distance: 158.46490147663616, cluster: 0 },
+                              { x: 198, y: 779, distance: 162.04513260200073, cluster: 0 },
+                              { x: 189, y: 530, distance: 135.5198324969449, cluster: 0 },
+                              { x: 383, y: 254, distance: 140.55287656647624, cluster: 2 },
+                              { x: 774, y: 146, distance: 192.2694868031731, cluster: 4 },
+                              { x: 911, y: 324, distance: 67.67980168082313, cluster: 4 },
+                              { x: 845, y: 506, distance: 180.67435407999176, cluster: 4 },
+                              { x: 668, y: 612, distance: 80.2052921501374, cluster: 3 },
+                              { x: 381, y: 449, distance: 215.35581023041843, cluster: 0 },
+                              { x: 257, y: 304, distance: 77.60011454745268, cluster: 2 },
+                              { x: 95, y: 124, distance: 182.14768123085668, cluster: 2 }
+                            ]
+                            
+                            const cent = [
+                              {cluster: 0, x: 273.75, y: 635.75 },
+                              {cluster: 1, x: 816, y: 887 },
+                              {cluster: 2, x: 245, y: 227.33333333333334 },
+                              {cluster: 3, x: 631.3333333333334, y: 683.3333333333334 },
+                              {cluster: 4, x: 843.3333333333334, y: 325.3333333333333 }
+                            ]
+                            
+                            // const colorMap = {
+                            //         0: "red",
+                            //         1: "green",
+                            //         2: "blue",
+                            //         3: "orange",
+                            //         4: "purple"
+                            //     };
+                             const  colorMap =  ["#558B6E", "#02A9EA", "#F0C808", "#E56399", "#8963BA", "#B4ADA3",  "#9EBD6E", "#322A26", "#EE6123", "#6D213C"]
+                            
+                            const pointGraphTitle = "Point Graph and Their Centroids"
+                            console.log("cent", cent)
+                            
+                             
+                            createPointScatterGraph(pointsOne, cent, colorMap, pointGraphTitle)
+                            function createPointScatterGraph(pointData, centroidData, colorMapData, graphTitle) {
+                            
+                                const svg = d3.select("#scatter-graph")
+                                    .append("svg")
+                                    .attr("width", 800)
+                                    .attr("height", 500);
+                            
+                            
+                                const margin = { top: 50, right: 150, bottom: 50, left: 70 };
+                                const width = +svg.attr("width") - margin.left - margin.right;
+                                const height = +svg.attr("height") - margin.top - margin.bottom;
+                            
+                                svg.append("text")
+                                    .attr("x", margin.left + width / 2) // Centered horizontally
+                                    .attr("y", margin.top - 30) // Adjust the vertical position above the graph
+                                    .attr("text-anchor", "middle") // Center the text
+                                    .style("font-size", "16px") // Set the font size
+                                    .style("font-weight", "bold") // Make the font bold
+                                    .text(graphTitle);
+                            
+                                // Helper function to round up to the nearest hundred
+                                const roundUpToNearestHundred = (num) => Math.ceil(num / 100) * 100;
+                            
+                                const xMax = roundUpToNearestHundred(d3.max(pointData, d => d.x)); // Round up the max x value
+                                const yMax = roundUpToNearestHundred(d3.max(pointData, d => d.y)); // Round up the max y value
+                            
+                                const x = d3.scaleLinear()
+                                    .domain([0, xMax])
+                                    .range([0, width]);
+                            
+                                const y = d3.scaleLinear()
+                                    .domain([0, yMax]) // Start at 0
+                                    .range([height, 0]);
+                            
+                                const g = svg.append("g")
+                                    .attr("transform", `translate(${margin.left},${margin.top})`);
+                            
+                                const tickValuesX = d3.range(0, xMax + 1, 100);
+                                const tickValuesY = d3.range(0, yMax + 1, 100);
+                            
+                                g.append("g")
+                                    .attr("class", "grid")
+                                    .attr("stroke-opacity", 0.2)
+                                    .call(d3.axisLeft(y)
+                                        .tickSize(-width)
+                                        .tickValues(tickValuesY)
+                                        .tickFormat(''));
+                            
+                                g.append("g")
+                                    .attr("class", "grid")
+                                    .attr("transform", `translate(0,${height})`)
+                                    .attr("stroke-opacity", 0.2)
+                                    .call(d3.axisBottom(x)
+                                        .tickSize(-height)
+                                        .tickValues(tickValuesX)
+                                        .tickFormat(''));
+                            
+                                g.append("g")
+                                    .attr("transform", `translate(0,${height})`)
+                                    .call(d3.axisBottom(x)
+                                        .tickValues(tickValuesX));
+                            
+                                g.append("g")
+                                    .call(d3.axisLeft(y)
+                                        .tickValues(tickValuesY));
+                            
+                                const tooltip = d3.select("body").append("div")
+                                    .attr("class", "tooltip");
+                            
+                                // Adding circles for data points with animation
+                                g.selectAll("circle.data-point")
+                                    .data(pointData)
+                                    .enter().append("circle")
+                                    .attr("class", "data-point")
+                                    .attr("cx", d => x(d.x))
+                                    .attr("cy", height) // Start from the bottom of the graph
+                                    .attr("r", 5)
+                                    .attr("fill", d => colorMapData[d.cluster])
+                                    .attr("stroke", "black")
+                                    .attr("stroke-width", 1)
+                                    .on("mouseover", (event, d) => {
+                                        tooltip.transition()
+                                            .duration(200)
+                                            .style("opacity", 1);
+                                        tooltip.html(`x: ${d.x}<br>y: ${d.y}<br>distance: ${d.distance.toFixed(2)}<br>cluster: ${d.cluster}`)
+                                            .style("left", (event.pageX + 5) + "px")
+                                            .style("top", (event.pageY - 28) + "px");
+                                    })
+                                    .on("mouseout", () => {
+                                        tooltip.transition()
+                                            .duration(500)
+                                            .style("opacity", 0);
+                                    })
+                                    .transition() // Start the transition
+                                    .duration(1000) // Duration of the transition in milliseconds
+                                    .attr("cy", d => y(d.y)); // Animate to the actual y value
+                            
+                                // Centroids animation (after a delay)
+                                g.selectAll("circle.centroid")
+                                    .data(centroidData)
+                                    .enter().append("circle")
+                                    // .attr("class", "centroid")
+                                    .attr("cx", d => x(d.x))
+                                    .attr("cy", height) // Start at the bottom
+                                    .attr("r", 8)
+                                    .attr("fill", "none")
+                                    .attr("stroke", "black")
+                                    .attr("stroke-width", 1)
+                                    .attr("opacity", 0) // Set initial opacity to 0
+                                    .transition() // Add transition for centroids
+                                    .duration(1500) // Duration for the animation
+                                    .delay((d, i) => 1000 + i * 100) // Delay centroids based on their index
+                                    .attr("cy", d => y(d.y)) // Animate to the correct y position
+                                    .attr("opacity", 1); // Animate opacity to 1
+
+                                // Adding text to the center of each circle
+                                g.selectAll("text.centroid-label")
+                                    .data(centroidData)
+                                    .enter()
+                                    .append("text")
+                                    .attr("class", "centroid-label")
+                                    .attr("x", d => x(d.x))
+                                    .attr("y", height) // Start at the bottom, same as circles
+                                    .attr("dy", "0.35em") // Adjust text vertically to center it
+                                    .attr("text-anchor", "middle") // Center text horizontally
+                                    .attr("opacity", 0) // Set initial opacity to 0
+                                    .text(d => d.cluster) // Replace with the text you want to display
+                                    .style("font-size", "10px") // Set the font size here
+                                    .transition() // Add transition for the text
+                                    .duration(1500) // Match duration with circle animation
+                                    .delay((d, i) => 1000 + i * 100) // Match delay with circle animation
+                                    .attr("y", d => y(d.y)) // Animate to the correct y position
+                                    .attr("opacity", 1); // Animate opacity to 1
+                            
+                                // X-axis label
+                                svg.append("text")
+                                    .attr("transform", `translate(${margin.left + width / 2},${margin.top + height + 40})`)
+                                    .style("text-anchor", "middle")
+                                    .text("x-axis");
+                            
+                                // Y-axis label
+                                svg.append("text")
+                                    .attr("transform", `translate(${margin.left - 50},${margin.top + height / 2}) rotate(-90)`)
+                                    .style("text-anchor", "middle")
+                                    .text("y-axis");
+                            
+                                // Dynamic Legend
+                                const uniqueClusters = [...new Set(pointData.map(d => d.cluster))].sort((a, b) => a - b); // Sort clusters in ascending order
+                            
+                                const legend = svg.append("g")
+                                    .attr("class", "legend")
+                                    .attr("transform", `translate(${margin.left + width + 10},${margin.top})`);
+                            
+                                // Add centroid legend item first
+                                const centroidLegend = legend.append("g")
+                                    .attr("class", "legend-item")
+                                    .attr("transform", `translate(0, 0)`); // Position at the top
+                            
+                                centroidLegend.append("circle")
+                                    .attr("cx", 9) // Center the circle on the x-axis
+                                    .attr("cy", 9) // Center vertically
+                                    .attr("r", 9) // Radius of the circle
+                                    .attr("fill", "black"); // Color for centroids
+                            
+                                centroidLegend.append("text")
+                                    .attr("x", 24) // Adjusting x position for better alignment
+                                    .attr("y", 9) // Aligning text vertically with the circles
+                                    .attr("dy", ".35em")
+                                    .style("text-anchor", "start")
+                                    .text("Centroid");
+                            
+                                // Add cluster items below the centroid
+                                const clusterItems = legend.selectAll(".legend-item.cluster")
+                                    .data(uniqueClusters)
+                                    .enter().append("g")
+                                    .attr("class", "legend-item cluster")
+                                    .attr("transform", (d, i) => `translate(0, ${(i + 2) * 20})`); // Add padding by starting from index 2
+                            
+                                clusterItems.append("circle")
+                                    .attr("cx", 9) // Center the circle on the x-axis
+                                    .attr("cy", 9) // Center vertically
+                                    .attr("r", 9) // Radius of the circle
+                                    .attr("fill", d => colorMapData[d]);
+                            
+                                clusterItems.append("text")
+                                    .attr("x", 24) // Adjusting x position for better alignment
+                                    .attr("y", 9) // Aligning text vertically with the circles
+                                    .attr("dy", ".35em")
+                                    .style("text-anchor", "start")
+                                    .text(d => `Cluster ${d}`);
+                            }
+                            </script> -->
+                            
+                          
+                            <script>
+                                // Define the dimensions of the SVG container
+                                const height = 350;
+                                const width = 550;
+                           
+                                const margin = { top: 30, right: 30, bottom: 50, left: 60 }; // Increased bottom margin for label
+                            
+                                // Create the SVG container
+                                const svg = d3.select("#chart")
+                                    .append("svg")
+                                    .attr("width", width + margin.left + margin.right)
+                                    .attr("height", height + margin.top + margin.bottom)
+                                    .append("g")
+                                    .attr("transform", `translate(${margin.left},${margin.top})`);
+                            
+                                // Define the scales (domain and range)
+                                const xScale = d3.scaleLinear()
+                                    .domain([1, 10]) // Example domain
+                                    .range([0, width]);
+                            
+                                const yScale = d3.scaleLinear()
+                                    .domain([0, 100]) // Example domain
+                                    .range([height, 0]);
+                            
+                                // Define the axes
+                                const xAxis = d3.axisBottom(xScale);
+                                const yAxis = d3.axisLeft(yScale);
+
+                                // Add chart header
+                                svg.append("text")
+                                    .attr("x", width / 2)
+                                    .attr("y", -margin.top / 2)
+                                    .attr("text-anchor", "middle")
+                                    .style("font-size", "16px")
+                                    .style("font-weight", "bold")
+                                    .text("Elbow Method");
+                                                            
+                                // Append the x-axis to the SVG container
+                                svg.append("g")
+                                    .attr("class", "x-axis")
+                                    .attr("transform", `translate(0,${height})`)
+                                    .call(xAxis);
+                            
+                                // Append x-axis label
+                                svg.append("text")
+                                    .attr("class", "x-axis-label")
+                                    .attr("text-anchor", "middle")
+                                    .attr("x", width/2)
+                                    .attr("y", height + margin.bottom - 5)
+                                    .text("Number of Centroids");
+                            
+                                // Append the y-axis to the SVG container
+                                svg.append("g")
+                                    .attr("class", "y-axis")
+                                    .call(yAxis);
+
+                                    // Add y-axis label
+                                svg.append("text")
+                                    .attr("transform", "rotate(-90)")
+                                    .attr("y", 0 - margin.left - 0)
+                                    .attr("x", 0 - (height / 2))
+                                    .attr("dy", "1em")
+                                    .style("text-anchor", "middle")
+                                    .text("Sum of Distances");
+ 
+                                // Helper function to round up to the nearest appropriate tick value
+                                const roundUpToNearestTick = (maxValue) => {
+                                    const exponent = Math.floor(Math.log10(maxValue)); // Get the order of magnitude
+                                    const base = Math.pow(10, exponent); // Calculate base (e.g., 100, 1000, etc.)
+                                    return Math.ceil(maxValue / base) * base; // Round up to the nearest base
+                                };
+
+                                function plotData(data) {
+                                    // Calculate the maximum y value in the data
+                                    const maxY = d3.max(data, d => d.y);
+
+                                    // Calculate the appropriate maximum y value for the y-axis
+                                    const yMax = roundUpToNearestTick(maxY);
+
+                                    // Update the yScale domain with the new yMax value
+                                    yScale.domain([0, yMax]);
+
+                                    // Redraw the y-axis with updated scale and formatting
+                                    svg.select(".y-axis")
+                                        .transition()
+                                        .duration(750)
+                                        .call(d3.axisLeft(yScale)
+                                            .ticks(5)
+                                            .tickFormat(d => d >= 1e6 ? (d / 1e6) + "M" :
+                                                            d >= 1e3 ? (d / 1e3) + "K" : d)
+                                        );
+
+                                    // Define the line generator
+                                    const line = d3.line()
+                                        .x(d => xScale(d.x))
+                                        .y(d => yScale(d.y));
+
+                                    // Remove any existing line
+                                    svg.selectAll("path.line").remove();
+                                    // Remove any existing dots
+                                    svg.selectAll("circle").remove();
+
+                                    // Create the initial flat line along the x-axis
+                                    const initialData = data.map(d => ({ x: d.x, y: 0 }));
+                                    const path = svg.append("path")
+                                        .datum(initialData)
+                                        .attr("class", "line")
+                                        .attr("fill", "none")
+                                        .attr("stroke", "steelblue")
+                                        .attr("stroke-width", 2)
+                                        .attr("d", line);
+
+                                    // Animate the line to its final position
+                                    path.transition()
+                                        .delay(500)
+                                        .duration(1000)
+                                        .attrTween("d", function() {
+                                            const interpolate = d3.interpolateArray(initialData, data);
+                                            return function(t) {
+                                                return line(interpolate(t));
+                                            };
+                                        })
+                                        .on("end", function() {
+                                            // Add and animate dots after the line animation
+                                            svg.selectAll("circle")
+                                                .data(data)
+                                                .enter()
+                                                .append("circle")
+                                                .attr("cx", d => xScale(d.x))
+                                                .attr("cy", d => yScale(d.y))
+                                                .attr("r", 4)
+                                                .attr("fill", "steelblue")
+                                                .attr("opacity", 0)
+                                                .transition()
+                                                .duration(500)
+                                                .attr("opacity", 1); // Fade in dots
+                                        });
+                                }
+                        </script>
+
+                        </div>
+                        <div class="data-section">
+                            <h3 class="data-section--title">Results:</h3>
+                            <div class="results-wrapper">
+                                <div class="graphs-area">
+                                    <div class="graph-points"></div>
+                                    <div class="graph-elbow"></div>
+                                </div>
+                                <div class="table-area-1">
+                                    <div id="table-closest-point" class="table-container">
+                                    </div>
+                                    <div class="table-area-one-inner-grid" >
+                                        <div id="table-cluster-cases" class="table-container">
+                                        </div>
+                                        <div id="table-cluster-centroids" class="table-container">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table-area-2">
+                                <div id="table-cluster-allocation" class="table-container">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <template id="template--two-column-table" class="table-wrapper">
+        <h4 class="table-name"></h4>
+        <div class="table-wrapper">
+            <table>
+                <tbody class="two-column-table">
+                    <tr>
+                        <th class="table-col-start">Cluster</th>
+                        <th class="table-col-end">Cases</th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </template> 
+    <template id="template--two-col-data-row">
+        <tr class="two-col-data-row">
+            <td class="table-col-start--data"></th>
+            <td class="table-col-end--data"></th>
+        </tr>
+    </template>
+    <template id="template--three-column-table" class="table-wrapper">
+        <h4 class="table-name"></h4>
+        <div class="table-wrapper">
+            <table class="three-col-table" >
+                <tbody class="three-column-table">
+                    <tr>
+                        <th class="table-col-start th-col-one"></th>
+                        <th class="table-col-align-right th-col-two td-min-width"></th>
+                        <th class="table-col-end th-col-three td-min-width"></th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </template> 
+    <template id="template--three-col-data-row">
+        <tr class="three-col-data-row">
+            <td class="table-col-start--data td-col-one"></td>
+            <td class="table-col-align-right td-col-two td-min-width"></td>
+            <td class="table-col-end--data td-col-three td-min-width"></td>
+        </tr>
+    </template>
+
+    <template id="template--four-column-table" class="table-wrapper">
+        <h4 class="table-name"></h4>
+        <div class="table-wrapper">
+            <table>
+                <tbody class="four-column-table">
+                    <tr>
+                        <th class="table-col-start th-col-one"></th>
+                        <th class="table-col-align-right th-col-two"></th>
+                        <th class="table-col-align-right th-col-three"></th>
+                        <th class="table-col-end th-col-four"></th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </template> 
+    <template id="template--four-col-data-row">
+        <tr class="four-col-data-row">
+            <td class="table-col-start--data td-col-one"></td>
+            <td class="table-col-align-right td-col-two"></td>
+            <td class="table-col-align-right td-col-three"></td>
+            <td class="table-col-end--data td-col-four"></td>
+        </tr>
+    </template>
+</body>
+</html>

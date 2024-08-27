@@ -1,0 +1,352 @@
+*, 
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --font-family-heading: "Lato", sans-serif;
+    --font-family-sub-text: "Crimson Text", serif;
+    --crimson-text-letter-spacing: 0.3px;
+    --clr-main: #CD7E2A;
+    --clr-second: #E8D3BD;
+    --clr-third: #7E2ACD;
+
+    --clr-error-text: #fb6f40;
+    
+    --clr-bkgd: #151413;
+
+    --subtext-opacity: 0.8;
+
+    --max-screen-width: 1800px;
+
+    --header-height-full: 66px;
+    --header-height-two: 57px;      /* For page widths < 600px */
+    --header-height-three: 52px;    /* For page widths < 500px */
+
+    --page-margin-full: 8rem;
+    --page-margin-six: 6rem;
+    --page-margin-four: 4rem;
+    --page-margin-two: 2rem;
+    --page-margin-one: 1rem;
+
+    --icon-grid-column-width: 80px;
+}
+
+body {
+    font-family: var(--font-family-heading);
+}
+
+li {
+    list-style: none;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.header-wrapper {
+    width: 100%;
+    background: var(--clr-bkgd);
+}
+
+.page-wrapper {
+    width: calc(100% - var(--page-margin-full));
+    max-width: var(--max-screen-width);
+    margin: 0 auto;
+    /* border: 1px solid red; */
+}
+
+.page-title {
+    padding: 1rem 0;
+    text-align: center;
+    font-weight: 500;
+}
+
+.main-grid-wrapper {
+    display: grid;
+    /* grid-template-columns: 200px 1fr; */
+    grid-template-columns: 1fr;
+    column-gap: 2rem;
+}
+
+.aside-wrapper {
+    border: 1px solid black;
+    padding: 1rem;
+}
+
+.aside-section-container {
+    padding-top: 2.7rem;
+}
+
+.aside-header {
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.aside-form-component-wrapper {
+    padding-top: 0.2rem;
+    padding-left: 1rem;
+    padding-bottom: 1.5rem;
+}
+
+.aside-form-inner-component {
+    padding: 0.3rem 0;
+}
+
+.click-area-title {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.click-area {
+    position: relative;
+    margin: 1rem 0;
+    width: 100%;
+    height: 300px;
+    border: 1px solid black;
+    border-radius: 5px;
+    background: #f6f6f6;
+}
+
+.dot {
+    position: absolute;
+    height: 10px;
+    width: 10px;
+    border-radius: 50%;
+    background: black;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+}
+
+.centroid {
+    width: 17px;
+    height: 17px;
+    font-size: 10px;
+    line-height: 1.3;
+    text-align: center;
+    border: 1px solid black;
+    border-radius: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+}
+
+.graph-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 2rem;
+    place-content: center;
+}
+
+.chart-container {
+    padding: 1rem;
+    /* border: 1px solid red; */
+    background: rgb(248, 248, 248);
+    border-radius: 5px;
+}
+
+/* .newCentroid {
+    width: 15px;
+    height: 15px;
+    border: 1px solid black;
+    border-radius: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+} */
+
+.click-area-form {
+    display: flex;
+    justify-content: space-between;
+}
+
+.btn-click-area-form {
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    min-width: 150px;
+    padding: 0.4rem 1rem;
+    border-radius: 5px;
+    background-color: var(--clr-bkgd);
+    color: var(--clr-second);
+    font-family: inherit;
+}
+
+.centroids-input input {
+    display: inline-block;
+    padding-left: 1rem;
+    margin: 0 0.5rem;
+    font-family: inherit;
+    width: 80px;
+}
+
+.error-message {
+    padding-top: 0.2rem;
+    color: rgb(218, 9, 9);
+    font-size: 0.875rem;
+    text-align: right;
+    visibility: hidden;
+}
+
+.error-message.show-message {
+    visibility: visible;
+}
+
+.btn-click-area-form + .btn-click-area-form {
+    margin-left: 0.5rem;
+}
+
+.btn-click-area-form:focus-visible,    
+.btn-click-area-form:hover {
+    background: var(--clr-main);
+    color: var(--clr-bkgd);
+}
+
+.data-section {
+    margin-top: 2rem;
+}
+
+.data-section--title {
+    padding-top: 1rem;
+}
+
+.results-wrapper {
+    padding-bottom: 2rem;
+}
+
+.table-name {
+    padding-left: 0.3rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.table-area-1 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 2rem;
+    padding-top: 1rem;
+    padding-bottom: 2rem;
+
+}
+
+.table-area-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding-top: 1rem;
+    padding-bottom: 2rem;
+    padding-bottom: 2rem;
+}
+
+.table-area-one-inner-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+@media (max-width: 1500px) {
+    .table-area-1 {
+        grid-template-columns: 1fr;
+        row-gap: 2rem;
+    }
+
+    .table-area-one-inner-grid {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+    }
+}
+
+@media (max-width: 900px) {
+    .table-area-one-inner-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        row-gap: 2rem;
+    }
+}
+
+.table-wrapper {
+    padding-top: 0.5rem;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+tr {
+    border-bottom: 1px solid grey;
+}
+
+th {
+    font-weight: 600;
+}
+
+th + th, 
+td + td {
+    padding-left: 20px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+  }
+
+tr:not(:first-child):hover {
+    background-color: var(--clr-second);
+}
+
+tr:last-child {
+    border-bottom: 2px solid black;
+}
+
+tr:first-child {
+    border-top: 1px solid gray;
+    border-bottom: 2px solid black;
+}
+
+.table-col-start {
+    padding-left: 1rem;
+}
+
+.table-col-start--data {
+    padding-left: 1.3rem;
+}
+
+.table-col-end {
+    padding-right: 1rem;
+     text-align: right;
+}
+
+.table-col-end--align-right {
+    text-align: right;
+}
+
+.table-col-end--data {
+    padding-right: 1rem;
+    text-align: right;
+}
+
+.table-col-align-right {
+    text-align: right;
+}
+
+.iterations-concluded {
+    visibility: hidden;
+}
+
+.iterations-concluded.isVisible{
+    visibility: visible;
+}
+
+
+.td-min-width {
+    min-width: 120px;
+}
+
+.td-min-width--sm {
+    width: 80px;
+}
+
+
+.three-col-table {
+    /* table-layout: fixed;  */
+}
+

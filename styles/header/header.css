@@ -1,0 +1,119 @@
+
+
+
+.header-wrapper {
+    position: sticky;
+    top: 0;
+    left: 0;
+    background: linear-gradient(182.5deg, rgb(205, 126, 42, 0.3) 0%,
+                                          rgba(21,20,19, .3) 44%),
+                                var(--clr-bkgd);
+    -webkit-backdrop-filter: blur( 20px );
+    backdrop-filter: blur( 20px );
+    z-index: 10;
+}
+
+.header-container {
+    display: flex;
+    width: calc(100% - var(--page-margin-full));
+    max-width: var(--max-screen-width);
+    margin: 0 auto;
+    padding: 0 0;
+    justify-content: space-between;
+    align-items: center;
+}
+
+@media screen and  (max-width: 960px) {
+    .header-container {
+        width: calc(100% - var(--page-margin-six));
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .header-container {
+        width: calc(100% - var(--page-margin-four));
+    }
+}
+
+@media screen and (max-width: 450px) {
+    .header-container {
+        width: calc(100% - var(--page-margin-two));
+    }
+
+    .header-logo-inner-container div:nth-child(2)::before,
+    .header-logo-inner-container div:nth-child(2)::after {
+        display: none;
+    }
+}
+
+.header-logo {
+    color: var(--clr-main);
+    padding: 10px 0;
+}
+
+.header-logo-inner-container div:nth-child(1) {
+    font-size: 34px;
+    line-height: 1;
+}
+
+.header-logo-inner-container div:nth-child(2) {
+    font-size: 10.3px;
+    position: relative;
+}
+
+@media screen and (max-width: 600px) {
+    .header-logo-inner-container div:nth-child(1) {
+        font-size: 27px;
+        line-height: 1;
+    }
+    
+    .header-logo-inner-container div:nth-child(2) {
+        font-size: 8px;
+        position: relative;
+    }
+}
+
+@media screen and (max-width: 500px) {
+    .header-logo-inner-container div:nth-child(1) {
+        font-size: 23.6px;
+        line-height: 1;
+    }
+    
+    .header-logo-inner-container div:nth-child(2) {
+        font-size: 7px;
+        position: relative;
+    }
+}
+
+.header-logo-inner-container div:nth-child(2)::before {
+    content: "";
+    position: absolute;
+    left: -15px;
+    top: 50%;
+    background: var(--clr-main);
+    height: 1px;
+    width: 12px;
+}
+
+.header-logo-inner-container div:nth-child(2)::after {
+    content: "";
+    position: absolute;
+    right: -15px;
+    top: 50%;
+    background: var(--clr-main);
+    height: 1px;
+    width: 12px;
+}
+
+.nav-links {
+    display: flex;
+    color: var( --clr-second);
+}
+
+.nav-links li:hover {
+    color: var(--clr-main);
+}
+
+.nav-links li + li {
+    margin-left: 6rem;
+}
